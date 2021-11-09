@@ -23,4 +23,13 @@ module Node
     nodes.values.find {|node| node.parent.nil? }
     
   end
+
+  def nodes
+    nodes = [
+      {id: 'a', state: :saved, into: [:submitted], children: ['b', 'c'], parent_id: nil},
+      {id: 'b', state: :submitted, into: [:saved, :accepted], children: ['c'], parent_id: 'a'},
+      {id: 'c', state: :accepted, into: [:submitted], children: [], parent_id: 'b'},
+    ]
+    nodes
+  end
 end

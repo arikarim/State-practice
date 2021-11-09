@@ -2,7 +2,7 @@ require 'ostruct'
 class PostsController < ApplicationController
   before_action :authenticate_user!, except: [:index, :show]
   before_action :set_post, only: %i[ show edit update destroy ]
-  include Node
+  # include Node
   # GET /posts or /posts.json
   def index
     @posts = Post.all
@@ -39,13 +39,13 @@ class PostsController < ApplicationController
   # PATCH/PUT /posts/1 or /posts/1.json
   def update
     authorize! :update, @post
-    nodes = [
-      {id: 'a', state: :saved, into: [:submitted], children: ['b', 'c'], parent_id: nil},
-      {id: 'b', state: :submitted, into: [:saved, :accepted], children: ['c'], parent_id: 'a'},
-      {id: 'c', state: :accepted, into: [:submitted], children: [], parent_id: 'b'},
+    states = [
+      {state: :saved, into: [:submitted], conditions: [:not_implemented_yet]},
+      {state: :submitted, into: [:saved, :accepted], conditions: [:not_implemented_yet]},
+      {state: :accepted, into: [:submitted], conditions: [:not_implemented_yet]},
     ]
-    post_state = @post.state
-    node = OpenStruct.new(nodes.select{|node| node[:state] == post_state.to_sym}.first)
+    # Find the correct state
+    node = OpenStruct.new(states.select{|node| node[:state] == @post.state.to_sym}.first)
 
     if node.into.include?(params[:post]['state'].to_sym)
       # if the user is the owner? he can update any parameters

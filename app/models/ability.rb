@@ -13,20 +13,29 @@ class Ability
     #     can :read, :all
     #   end
     #
-    nodes = [
-      {state: :saved, into: [:submitted], children: ['b', 'c']},
-      {state: :submitted, into: [:saved, :accepted], children: ['c']},
-      {state: :accepted, into: [:submitted], children: []},
-    ]
+    # nodes = [
+    #   {state: :saved, into: [:submitted], children: ['b', 'c']},
+    #   {state: :submitted, into: [:saved, :accepted], children: ['c']},
+    #   {state: :accepted, into: [:submitted], children: []},
+    # ]
 
-    post = Post.find(params[:id])
-    node = OpenStruct.new(nodes.select{|node| node[:state] == post.state.to_sym}.first)
+    # post = Post.find(params[:id])
+    # node = OpenStruct.new(nodes.select{|node| node[:state] == post.state.to_sym}.first)
     # byebug
-    if user.has_role?(:admin) && node.into.include?(params[:post]['state'].to_sym)
-      can :read, Post
+    if user.has_role?(:requester)
+      can :read, Post, state: 'saved'
       can :update , Post, user_id: user.id, state: 'saved'
+      can :update , Post, state: 'saved'
+    end
+
+    if user.has_role?(:decition_maker)
+      can :read, Post, state: 'submitted'
       can :update , Post, state: 'submitted'
-      can :update , Post, state: 'accepted'
+    end
+
+    if user.has_role?(:admin)
+      can :read, Post
+      can :update , Post
     end
     # The first argument to `can` is the action you are giving the user
     # permission to do.
