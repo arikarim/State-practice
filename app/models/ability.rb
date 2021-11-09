@@ -3,16 +3,31 @@
 class Ability
   include CanCan::Ability
 
-  def initialize(user)
+  def initialize(user, params)
     # Define abilities for the passed in user here. For example:
     #
-    #   user ||= User.new # guest user (not logged in)
+      user ||= User.new # guest user (not logged in)
     #   if user.admin?
     #     can :manage, :all
     #   else
     #     can :read, :all
     #   end
     #
+    nodes = [
+      {state: :saved, into: [:submitted], children: ['b', 'c']},
+      {state: :submitted, into: [:saved, :accepted], children: ['c']},
+      {state: :accepted, into: [:submitted], children: []},
+    ]
+
+    post = Post.find(params[:id])
+    node = OpenStruct.new(nodes.select{|node| node[:state] == post.state.to_sym}.first)
+    # byebug
+    if user.has_role?(:admin) && node.into.include?(params[:post]['state'].to_sym)
+      can :read, Post
+      can :update , Post, user_id: user.id, state: 'saved'
+      can :update , Post, state: 'submitted'
+      can :update , Post, state: 'accepted'
+    end
     # The first argument to `can` is the action you are giving the user
     # permission to do.
     # If you pass :manage it will apply to every action. Other common actions

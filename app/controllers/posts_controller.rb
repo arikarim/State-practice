@@ -38,6 +38,7 @@ class PostsController < ApplicationController
 
   # PATCH/PUT /posts/1 or /posts/1.json
   def update
+    authorize! :update, @post
     nodes = [
       {id: 'a', state: :saved, into: [:submitted], children: ['b', 'c'], parent_id: nil},
       {id: 'b', state: :submitted, into: [:saved, :accepted], children: ['c'], parent_id: 'a'},
@@ -46,23 +47,27 @@ class PostsController < ApplicationController
     post_state = @post.state
     node = OpenStruct.new(nodes.select{|node| node[:state] == post_state.to_sym}.first)
 
-    byebug
-    # @root = build_tree(nodes)
     if node.into.include?(params[:post]['state'].to_sym)
-      respond_to do |format|
-        if @post.update(post_params)
-          format.html { redirect_to @post, notice: "Post was successfully updated." }
-          format.json { render :show, status: :ok, location: @post }
-        else
-          format.html { render :edit, status: :unprocessable_entity }
-          format.json { render json: @post.errors, status: :unprocessable_entity }
+      # if the user is the owner? he can update any parameters
+      if @post.user_id == current_user.id
+        respond_to do |format|
+          if @post.update(post_params)
+            format.html { redirect_to @post, notice: "Post was successfully updated." }
+            format.json { render :show, status: :ok, location: @post } and return
+          else
+            format.html { render :edit, status: :unprocessable_entity }
+            format.json { render json: @post.errors, status: :unprocessable_entity } and return
+          end
         end
+      # else, we update the state only
+      else
+        @post.update(state: params[:post]['state'])
+        redirect_to @post, notice: "Post was successfully updated." and return
       end
-    else
-      respond_to do |format|
-        format.html { redirect_to @post, notice: "You are not authorized to do this." }
-        format.json { render :show, status: :unprocessable_entity, location: @post }
-      end
+    end
+    respond_to do |format|
+      format.html { redirect_to @post, notice: "You are not authorized to do this." }
+      format.json { render :show, status: :unprocessable_entity, location: @post }
     end
   end
 
