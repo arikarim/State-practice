@@ -1,4 +1,3 @@
-require 'ostruct'
 class PostsController < ApplicationController
   before_action :authenticate_user!, except: [:index, :show]
   before_action :set_post, only: %i[ show edit update destroy ]
@@ -39,13 +38,7 @@ class PostsController < ApplicationController
   # PATCH/PUT /posts/1 or /posts/1.json
   def update
     authorize! :update, @post
-    states = [
-      {state: :saved, into: [:submitted], conditions: [:not_implemented_yet]},
-      {state: :submitted, into: [:saved, :accepted], conditions: [:not_implemented_yet]},
-      {state: :accepted, into: [:submitted], conditions: [:not_implemented_yet]},
-    ]
-    # Find the correct state
-    node = OpenStruct.new(states.select{|node| node[:state] == @post.state.to_sym}.first)
+    node = Post.states(@post)
 
     if node.into.include?(params[:post]['state'].to_sym)
       # if the user is the owner? he can update any parameters
@@ -64,6 +57,7 @@ class PostsController < ApplicationController
         @post.update(state: params[:post]['state'])
         redirect_to @post, notice: "Post was successfully updated." and return
       end
+      
     end
     respond_to do |format|
       format.html { redirect_to @post, notice: "You are not authorized to do this." }
