@@ -17,8 +17,11 @@
   </div>
 
   <div class="field">
-    <%= form.label :state %>
-    <%= form.text_field :state %>
+  <%# create a select bar %>
+  
+  <%# <%= select_tag(:state, options_for_select(Post.states(post).into, params['state'] ), class:"select") %> 
+  <%= form.select :state, Post.states(post).into, {}, class:"select" %>
+ 
   </div>
 
   <div class="actions">

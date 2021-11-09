@@ -45,8 +45,8 @@ class PostsController < ApplicationController
       if @post.user_id == current_user.id
         respond_to do |format|
           if @post.update(post_params)
-            format.html { redirect_to @post, notice: "Post was successfully updated." }
-            format.json { render :show, status: :ok, location: @post } and return
+            redirect_to @post, notice: "Post was successfully updated."
+            return
           else
             format.html { render :edit, status: :unprocessable_entity }
             format.json { render json: @post.errors, status: :unprocessable_entity } and return
@@ -63,6 +63,7 @@ class PostsController < ApplicationController
       format.html { redirect_to @post, notice: "You are not authorized to do this." }
       format.json { render :show, status: :unprocessable_entity, location: @post }
     end
+    
   end
 
   # DELETE /posts/1 or /posts/1.json
