@@ -38,9 +38,9 @@ class PostsController < ApplicationController
   # PATCH/PUT /posts/1 or /posts/1.json
   def update
     authorize! :update, @post
-    node = Post.states(@post)
+    flow = Post.states(@post)
 
-    if node.into.include?(params[:post]['state'].to_sym)
+    if flow.into.include?(params[:post]['state'].to_sym)
       # if the user is the owner? he can update any parameters
       if @post.user_id == current_user.id
         respond_to do |format|

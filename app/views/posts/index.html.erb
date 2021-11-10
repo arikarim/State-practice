@@ -3,6 +3,7 @@
 <h1>Posts</h1>
 
 <table>
+<% if can? :read, Post %>
   <thead>
     <tr>
       <th>Title</th>
@@ -22,6 +23,7 @@
       </tr>
     <% end %>
   </tbody>
+<% end %>
 </table>
 
 <br>

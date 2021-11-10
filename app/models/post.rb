@@ -1,13 +1,13 @@
 require 'ostruct'
 class Post < ApplicationRecord
   
-    def self.testing_condition_true!
-      true
-    end
+  def self.testing_condition_true!
+    true
+  end
 
-    def self.testing_condition_false!
-      false
-    end
+  def self.testing_condition_false!
+    false
+  end
   def self.states(post)
     states = [
       {
@@ -50,13 +50,13 @@ class Post < ApplicationRecord
       }
     ]
 
-    # # Find the correct state
+    # # Find the correct flow
     # byebug
     nodes = states.select { |node| node[:state] == post.state.to_sym }
-    no = nodes.map { |e| OpenStruct.new(e) }
-    # Ensure that only states whom conditions are met are returned
-    no = no.select { |node| node.conditions.all? { |condition| self.send("#{condition.to_s}!") } == true }
+    flows = nodes.map { |e| OpenStruct.new(e) }
+    # Ensure that only states whom conditions are met or conditions are empty are returned
+    flows = flows.select { |flow| flow.conditions.empty? ? true : flow.conditions.all? { |condition| self.send("#{condition.to_s}!") } == true }
     # Return the first result
-    no.first
+    flows.first
   end
 end

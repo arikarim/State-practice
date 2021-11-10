@@ -6,13 +6,13 @@ class Ability
   def initialize(user, params)
     user ||= User.new # guest user (not logged in)
 
+    
     post = Post.find(params[:id])
-    node = Post.states(post)
+    flow = Post.states(post)
 
     can %i[read update], Post do |post|
       return false if user.id != post.user_id
 
-      # byebug
       %i[saved returned_to_requester_by_decition_maker returned_to_requester_by_admin].include?(post.state.to_sym)
     end
     if user.has_role?(:requester)
