@@ -3,12 +3,8 @@
 class Ability
   include CanCan::Ability
 
-  def initialize(user, params)
+  def initialize(user, _params)
     user ||= User.new # guest user (not logged in)
-
-    
-    post = Post.find(params[:id])
-    flow = Post.states(post)
 
     can %i[read update], Post do |post|
       return false if user.id != post.user_id
@@ -18,14 +14,17 @@ class Ability
     if user.has_role?(:requester)
       states_can_be_seen_and_updated_by_requester = %i[saved returned_to_requester_by_decition_maker
                                                        returned_to_requester_by_admin]
-
-      can %i[read update], Post if states_can_be_seen_by_requester.include?(post.state.to_sym)
+      can %i[read update], Post do |post|
+        states_can_be_seen_by_requester.include?(post.state.to_sym)
+      end
     end
 
     if user.has_role?(:decition_maker)
       states_can_be_seen_and_updated_by_decition_maker = %i[submitted_by_requester returned_to_dicition_maker_by_admin]
 
-      can %i[read update], Post if states_can_be_seen_and_updated_by_decition_maker.include?(post.state.to_sym)
+      can %i[read update], Post do |post|
+        states_can_be_seen_and_updated_by_decition_maker.include?(post.state.to_sym)
+      end
     end
 
     if user.has_role?(:admin)
